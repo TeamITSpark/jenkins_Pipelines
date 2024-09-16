@@ -10,7 +10,7 @@ node () {
 	stage ('first-project-jar - Build') {
  			// Batch build step
 bat """ 
-mvn clean package install 
+mvn clean package
  """ 
 	}
 }
