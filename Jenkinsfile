@@ -1,0 +1,17 @@
+// Powered by Infostretch 
+
+timestamps {
+
+node () {
+
+	stage ('first-project-jar - Checkout') {
+ 	 checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/TeamITSpark/first-project-jar.git']]]) 
+	}
+	stage ('first-project-jar - Build') {
+ 			// Batch build step
+bat """ 
+mvn clean package install 
+ """ 
+	}
+}
+}
