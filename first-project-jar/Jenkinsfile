@@ -1,45 +1,57 @@
 timestamps {
-    node() {
-        // Use an environment variable for the Slack channel
-        def slackChannel = env.SLACK_CHANNEL ?: '#your-slack-channel'
+    // Define input parameters for the pipeline
+    properties([
+        parameters([
+            string(name: 'SLACK_CHANNEL', defaultValue: '#default-channel', description: 'Specify the Slack channel for notifications')
+        ])
+    ])
 
+    node() {
         try {
             stage('first-project-jar - Checkout') {
                 checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/TeamITSpark/first-project-jar.git']]]) 
             }
 
             stage('first-project-jar - compile') {
+                // Batch build step
                 bat """ 
                 mvn clean compile
                 """ 
             }
 
             stage('first-project-jar - test') {
+                // Batch build step
                 bat """ 
                 mvn clean test
                 """
+                // Archive the JUnit test result report
                 junit '**/target/surefire-reports/*.xml'
             }
 
             stage('first-project-jar - package') {
+                // Batch build step
                 bat """ 
                 mvn clean package
                 """ 
             }
 
             stage('first-project-jar - install') {
+                // Batch build step
                 bat """ 
                 mvn clean install
                 """ 
             }
 
-            slackSend (channel: slackChannel, color: 'good', message: "Build Success: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+            // Success Slack Notification
+            slackSend (channel: params.SLACK_CHANNEL, color: 'good', message: "Build Success: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
 
         } catch (Exception e) {
-            slackSend (channel: slackChannel, color: 'danger', message: "Build Failed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+            // Failure Slack Notification
+            slackSend (channel: params.SLACK_CHANNEL, color: 'danger', message: "Build Failed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
             throw e
         } finally {
-            slackSend (channel: slackChannel, color: '#FFFF00', message: "Build Completed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+            // Always notify on completion
+            slackSend (channel: params.SLACK_CHANNEL, color: '#FFFF00', message: "Build Completed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
         }
     }
 }
