@@ -41,16 +41,29 @@ timestamps {
                 """ 
             }
 
-            // Success Slack Notification
-            slackSend (channel: params.SLACK_CHANNEL, color: 'good', message: "Build Success: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-
         } catch (Exception e) {
-            // Failure Slack Notification
-            slackSend (channel: params.SLACK_CHANNEL, color: 'danger', message: "Build Failed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+            // If any failure happens, rethrow to handle it in the post block
             throw e
         } finally {
-            // Always notify on completion
-            slackSend (channel: params.SLACK_CHANNEL, color: '#FFFF00', message: "Build Completed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+            // Notification stage will handle notifications for both success and failure
+        }
+
+        // Separate Slack Notification Stage
+        stage('Notification') {
+            post {
+                success {
+                    // Send success notification
+                    slackSend (channel: params.SLACK_CHANNEL, color: 'good', message: "Build Success: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+                }
+                failure {
+                    // Send failure notification
+                    slackSend (channel: params.SLACK_CHANNEL, color: 'danger', message: "Build Failed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+                }
+                always {
+                    // Always notify on completion
+                    slackSend (channel: params.SLACK_CHANNEL, color: '#FFFF00', message: "Build Completed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+                }
+            }
         }
     }
 }
