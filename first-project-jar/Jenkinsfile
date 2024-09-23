@@ -7,11 +7,35 @@ node () {
 	stage ('first-project-jar - Checkout') {
  	 checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/TeamITSpark/first-project-jar.git']]]) 
 	}
-	stage ('first-project-jar - Build') {
+	stage ('first-project-jar - compile') {
  			// Batch build step
-bat """ 
-mvn clean package
- """ 
+		bat """ 
+		mvn clean compile
+		""" 
 	}
-}
+	stage ('first-project-jar - test') {
+ 			// Batch build step
+		bat """ 
+		mvn clean test
+		""" 
+	}
+	stage ('first-project-jar - package') {
+ 			// Batch build step
+		bat """ 
+		mvn clean package
+		""" 
+	}
+	stage ('first-project-jar - install') {
+ 			// Batch build step
+		bat """ 
+		mvn clean install
+		""" 
+	}
+	stage ('first-project-jar - copy to D:\') {
+ 			// Batch build step
+		bat """ 
+		copy /Y target\first-project-1.0-SNAPSHOT.jar D:\
+		""" 
+	}
+	}
 }
