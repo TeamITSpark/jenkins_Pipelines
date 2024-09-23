@@ -1,8 +1,8 @@
 timestamps {
-    // Define input parameters for the pipeline
+    // Define input parameters for the pipeline, including the default Slack channel as '#notifications'
     properties([
         parameters([
-            string(name: 'SLACK_CHANNEL', defaultValue: '#default-channel', description: 'Specify the Slack channel for notifications')
+            string(name: 'SLACK_CHANNEL', defaultValue: '#notifications', description: 'Specify the Slack channel for notifications')
         ])
     ])
 
@@ -19,13 +19,12 @@ timestamps {
                 """ 
             }
 
-            stage('first-project-jar - test') {
-                // Batch build step
-                bat """ 
-                mvn clean test
-                """
-                // Archive the JUnit test result report
-                junit '**/target/surefire-reports/*.xml'
+            // Approval before proceeding to package
+            stage('Approval') {
+                // Wait for user approval to proceed
+                input message: 'Proceed to package?', ok: 'Yes, continue', parameters: [
+                    string(name: 'SLACK_CHANNEL', defaultValue: params.SLACK_CHANNEL, description: 'Specify the Slack channel for notifications')
+                ]
             }
 
             stage('first-project-jar - package') {
