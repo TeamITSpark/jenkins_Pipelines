@@ -31,7 +31,7 @@ node () {
 		mvn clean install
 		""" 
 	}
-	stage ('first-project-jar - copy to D:\') {
+	stage ('first-project-jar - copy to D:') {
  			// Batch build step
 		bat """ 
 		copy /Y target\first-project-1.0-SNAPSHOT.jar D:\
